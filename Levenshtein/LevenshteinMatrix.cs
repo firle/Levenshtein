@@ -30,7 +30,8 @@ namespace Levenshtein
                 for (int j = 0; j <= m; ++j)
                 {
                 M[i, j] = new LevField(levDistanceDirection(i, j));
-                PrintDirection();
+
+                    Console.WriteLine(this);
                     Thread.Sleep(100);
                 }
             
@@ -76,10 +77,8 @@ namespace Levenshtein
             ELevDirection drc = 0;
 
             if (ai == bj)
-            {
                 d = M[i - 1, j - 1];
-                drc |= ELevDirection.UpLeft;
-            }
+            
             int u = M[i - 1, j] + 1;
             int l = M[i, j - 1] + 1;
 
@@ -98,57 +97,61 @@ namespace Levenshtein
                 val = Math.Min(l, d);
             }
 
+            if (val == d)
+                drc |= ELevDirection.UpLeft;
             return (val, drc);
         }
-        public void PrintDirection()
-        {
-            Console.WriteLine();
 
-            Console.Write("       ");
 
-            for (int i = 0; i < m; ++i)
-                Console.Write($"{b[i]}   ");
-            Console.WriteLine();
+        //public void PrintDirection()
+        //{
+        //    Console.WriteLine();
 
-            for (int i = 0; i <= n; ++i)
-            {
-                if (i > 0)
-                {
-                    string c = "\n   ";
-                    for (int j = 0; j <= m; ++j)
-                    {
-                        var field = M[i, j];
-                        if (field == null) continue;
-                        //((field.Direction & ELevDirection.Left) != 0) ? " - " : "   ";
-                        if (j != 0)
-                        {
-                            c += ((field?.Direction & ELevDirection.UpLeft) != 0) ? @" \ " : "   ";
-                            c += ((field?.Direction& ELevDirection.Up) != 0) ? "|" : " ";
-                        }
-                        else
-                            c+=((field?.Direction & ELevDirection.Up) != 0) ? "|" : " ";
-                    }
+        //    Console.Write("       ");
 
-                    Console.Write(c);
-                    Console.Write($"\n{a[i - 1]}  ");
-                }
-                else
-                    Console.Write("\n   ");
-                for (int j = 0; j <= m; ++j)
-                {
-                    var field = M[i, j];
-                    if ((j != 0)&&(field != null))
-                    {
-                        var c = ((field?.Direction & ELevDirection.Left) != 0) ? " - " : "   ";
+        //    for (int i = 0; i < m; ++i)
+        //        Console.Write($"{b[i]}   ");
+        //    Console.WriteLine();
 
-                        Console.Write($"{c}{field}");
-                    }
-                    else
-                        Console.Write(field?.ToString());
+        //    for (int i = 0; i <= n; ++i)
+        //    {
+        //        if (i > 0)
+        //        {
+        //            string c = "\n   ";
+        //            for (int j = 0; j <= m; ++j)
+        //            {
+        //                var field = M[i, j];
+        //                if (field == null) continue;
+        //                //((field.Direction & ELevDirection.Left) != 0) ? " - " : "   ";
+        //                if (j != 0)
+        //                {
+        //                    c += ((field?.Direction & ELevDirection.UpLeft) != 0) ? @" \ " : "   ";
+        //                    c += ((field?.Direction& ELevDirection.Up) != 0) ? "|" : " ";
+        //                }
+        //                else
+        //                    c+=((field?.Direction & ELevDirection.Up) != 0) ? "|" : " ";
+        //            }
 
-                }
-            }
-        }
+        //            Console.Write(c);
+        //            Console.Write($"\n{a[i - 1]}  ");
+        //        }
+        //        else
+        //            Console.Write("\n   ");
+        //        for (int j = 0; j <= m; ++j)
+        //        {
+        //            var field = M[i, j];
+        //            if ((j != 0)&&(field != null))
+        //            {
+        //                var c = ((field?.Direction & ELevDirection.Left) != 0) ? " - " : "   ";
+
+        //                Console.Write($"{c}{field}");
+        //            }
+        //            else
+        //                Console.Write(field?.ToString());
+
+        //        }
+        //    }
+        //}
 
         public override string ToString()
         {

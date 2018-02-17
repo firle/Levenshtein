@@ -13,7 +13,7 @@ namespace Levenshtein
 
 
             var start = DateTime.Now;
-            var matrix = new LevenshteinMatrix("abababab","abaabab");
+            var matrix = new LevenshteinMatrix("Petra","Peter");
             Console.WriteLine($"\nTime: {(DateTime.Now-start).Milliseconds}");
 
             Console.WriteLine(matrix);
