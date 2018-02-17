@@ -5,8 +5,8 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProjectGuid>{59543250-D0EA-4E0F-8B86-B663C8D93F0E}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Levenstein</RootNamespace>
-    <AssemblyName>Levenstein</AssemblyName>
+    <RootNamespace>Levenshtein</RootNamespace>
+    <AssemblyName>Levenshtein</AssemblyName>
     <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
@@ -37,6 +37,7 @@
     <Compile Include="LevenshteinMatrix.cs" />
     <Compile Include="ELevDirection.cs" />
     <Compile Include="Alignment.cs" />
+    <Compile Include="LevField.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

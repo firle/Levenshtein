@@ -12,10 +12,11 @@ namespace Levenshtein
             //var input2 = Console.ReadLine();
 
 
+            var start = DateTime.Now;
+            var matrix = new LevenshteinMatrix("abababab","abaabab");
+            Console.WriteLine($"\nTime: {(DateTime.Now-start).Milliseconds}");
 
-            var matrix = new LevenshteinMatrix("lala","lalla");
-
-            matrix.Print();
+            Console.WriteLine(matrix);
 
             //Console.ReadLine();
 

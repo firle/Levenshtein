@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
+using System.Threading;
 
 namespace Levenshtein
 {
@@ -8,7 +10,9 @@ namespace Levenshtein
     {
         int n, m;
 
-        int[,] M;
+        //int[,] M;
+
+        LevField[,] M;
 
         string a,b;
 
@@ -20,13 +24,14 @@ namespace Levenshtein
             a = input1;
             b = input2;
 
-            M = new int[n+1, m+1];
+            M = new LevField[n+1, m+1];
 
             for (int i = 0; i <= n; ++i)
                 for (int j = 0; j <= m; ++j)
                 {
-                    M[i, j] = levDistance(i, j);
-                //Print();
+                M[i, j] = new LevField(levDistanceDirection(i, j));
+                PrintDirection();
+                    Thread.Sleep(100);
                 }
             
         }
@@ -52,6 +57,153 @@ namespace Levenshtein
             return Math.Min(val, M[i - 1, j - 1] + 1);
         }
 
+        public (int, ELevDirection) levDistanceDirection(int i, int j)
+        {
+            Console.Write($"\n({i},{j}): ");
+            if (Math.Min(i, j) == 0)
+                return (i > j) ? (i, ELevDirection.Up) 
+                               : (i < j) ? (j, ELevDirection.Left) 
+                                         : (0, ELevDirection.None);
+
+            var ai = a[i - 1];
+            var bj = b[j - 1];
+
+            //Console.Write($"({ai},{bj})");
+
+            int d = M[i - 1, j - 1]+1;
+            int val = 0;
+
+            ELevDirection drc = 0;
+
+            if (ai == bj)
+            {
+                d = M[i - 1, j - 1];
+                drc |= ELevDirection.UpLeft;
+            }
+            int u = M[i - 1, j] + 1;
+            int l = M[i, j - 1] + 1;
+
+            if (Math.Min(u, l) > d)
+                return (d, ELevDirection.UpLeft);
+
+
+            if (l >= u)
+            {
+                drc |= ELevDirection.Up;
+                val = Math.Min(u, d);
+            }
+            if (l <= u)
+            {
+                drc |= ELevDirection.Left;
+                val = Math.Min(l, d);
+            }
+
+            return (val, drc);
+        }
+        public void PrintDirection()
+        {
+            Console.WriteLine();
+
+            Console.Write("       ");
+
+            for (int i = 0; i < m; ++i)
+                Console.Write($"{b[i]}   ");
+            Console.WriteLine();
+
+            for (int i = 0; i <= n; ++i)
+            {
+                if (i > 0)
+                {
+                    string c = "\n   ";
+                    for (int j = 0; j <= m; ++j)
+                    {
+                        var field = M[i, j];
+                        if (field == null) continue;
+                        //((field.Direction & ELevDirection.Left) != 0) ? " - " : "   ";
+                        if (j != 0)
+                        {
+                            c += ((field?.Direction & ELevDirection.UpLeft) != 0) ? @" \ " : "   ";
+                            c += ((field?.Direction& ELevDirection.Up) != 0) ? "|" : " ";
+                        }
+                        else
+                            c+=((field?.Direction & ELevDirection.Up) != 0) ? "|" : " ";
+                    }
+
+                    Console.Write(c);
+                    Console.Write($"\n{a[i - 1]}  ");
+                }
+                else
+                    Console.Write("\n   ");
+                for (int j = 0; j <= m; ++j)
+                {
+                    var field = M[i, j];
+                    if ((j != 0)&&(field != null))
+                    {
+                        var c = ((field?.Direction & ELevDirection.Left) != 0) ? " - " : "   ";
+
+                        Console.Write($"{c}{field}");
+                    }
+                    else
+                        Console.Write(field?.ToString());
+
+                }
+            }
+        }
+
+        public override string ToString()
+        {
+            var str = "\n";
+
+            var sb = new StringBuilder("\n");
+
+
+            sb.Append("       ");
+
+            for (int i = 0; i < m; ++i)
+                sb.Append($"{b[i]}   ");
+            sb.Append("\n");
+
+            for (int i = 0; i <= n; ++i)
+            {
+                if (i > 0)
+                {
+                    string c = "\n   ";
+                    for (int j = 0; j <= m; ++j)
+                    {
+                        var field = M[i, j];
+                        if (field == null) continue;
+                        //((field.Direction & ELevDirection.Left) != 0) ? " - " : "   ";
+                        if (j != 0)
+                        {
+                            c += ((field?.Direction & ELevDirection.UpLeft) != 0) ? @" \ " : "   ";
+                            c += ((field?.Direction & ELevDirection.Up) != 0) ? "|" : " ";
+                        }
+                        else
+                            c += ((field?.Direction & ELevDirection.Up) != 0) ? "|" : " ";
+                    }
+
+                    sb.Append(c);
+                    sb.Append($"\n{a[i - 1]}  ");
+                }
+                else
+                    sb.Append("\n   ");
+                for (int j = 0; j <= m; ++j)
+                {
+                    var field = M[i, j];
+                    if ((j != 0) && (field != null))
+                    {
+                        var c = ((field?.Direction & ELevDirection.Left) != 0) ? " - " : "   ";
+
+                        sb.Append($"{c}{field}");
+                    }
+                    else
+                        sb.Append(field?.ToString());
+                }
+            }
+
+            return sb.ToString();
+        }
+
         public void Print()
         {
             Console.WriteLine();
@@ -72,7 +224,6 @@ namespace Levenshtein
                     Console.Write($"{M[i, j]}   ");
             }
         }
-
         public void CalcAlignments()
         {
             
