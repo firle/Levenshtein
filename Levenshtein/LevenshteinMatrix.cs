@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 
@@ -8,59 +9,96 @@ namespace Levenshtein
 {
     public class LevenshteinMatrix
     {
-        int n, m;
+        int m, n;
 
         //int[,] M;
 
         LevField[,] M;
 
-        string a,b;
+
+        string a;
+        string b;
 
         public LevenshteinMatrix(string input1, string input2)
         {
-            n = input1.Length;
-            m = input2.Length;
+            m = input1.Length;
+            n = input2.Length;
+
+            int minLength = Math.Min(n, m);
 
             a = input1;
             b = input2;
 
-            M = new LevField[n+1, m+1];
+            M = new LevField[m+1, n+1];
+            int colStart = 0;
+            var K = Helper.HammingDistance(a, b);
+            Console.WriteLine(K);
 
-            for (int i = 0; i <= n; ++i)
-                for (int j = 0; j <= m; ++j)
+            int f;
+            LevField dist;
+
+            for (int i = 0; i <= m; ++i)
+            {
+                for (int j = colStart; j <= n; ++j)
                 {
-                M[i, j] = new LevField(levDistanceDirection(i, j));
+                    dist  = new LevField(levDistanceDirection(i, j));
 
-                    Console.WriteLine(this);
-                    Thread.Sleep(100);
+                    f = dist + Math.Abs(i - j);
+
+                    if (f == K)
+                    {
+                        if (j < i)
+                        {
+                            colStart = j + 1;
+                        }
+                        else if (j > i)
+                        {
+                            M[i, j] = dist;
+                            break;
+                        }
+                    }
+                    else if (f > K)
+                        if (j < i)
+                        {
+                            colStart = j + 2;
+                    }
+                        else if (j > i)
+                        {
+                            M[i, j] = dist;
+                            break;
+                    }
+
+                    M[i, j] = dist;
+
+                    //Console.WriteLine(this);
+                    //Thread.Sleep(100);
                 }
+            }
+
+
             
         }
 
         public int levDistance(int i, int j)
         {
-            Console.Write($"\n({i},{j}): ");
             if (Math.Min(i, j) == 0)
                 return Math.Max(i, j);
 
             var ai = a[i-1];
             var bj = b[j-1];
 
-            //Console.Write($"({ai},{bj})");
 
-            if (ai == bj)
+            if (ai.Equals(bj))
                 return M[i - 1, j - 1];
 
             var val = Math.Min(M[i - 1, j] + 1, M[i, j - 1] + 1);
-
-            Console.Write($"{val}  ");
 
             return Math.Min(val, M[i - 1, j - 1] + 1);
         }
 
         public (int, ELevDirection) levDistanceDirection(int i, int j)
         {
-            Console.Write($"\n({i},{j}): ");
+            //initialize Matrix
             if (Math.Min(i, j) == 0)
                 return (i > j) ? (i, ELevDirection.Up) 
                                : (i < j) ? (j, ELevDirection.Left) 
@@ -68,8 +106,6 @@ namespace Levenshtein
 
             var ai = a[i - 1];
             var bj = b[j - 1];
-
-            //Console.Write($"({ai},{bj})");
 
             int d = M[i - 1, j - 1]+1;
             int val = 0;
@@ -79,8 +115,8 @@ namespace Levenshtein
             if (ai == bj)
                 d = M[i - 1, j - 1];
             
-            int u = M[i - 1, j] + 1;
-            int l = M[i, j - 1] + 1;
+            int u = M[i - 1, j]+1;
+            int l = M[i, j - 1]+1;
 
             if (Math.Min(u, l) > d)
                 return (d, ELevDirection.UpLeft);
@@ -101,6 +137,8 @@ namespace Levenshtein
                 drc |= ELevDirection.UpLeft;
             return (val, drc);
         }
+
+
 
 
         //public void PrintDirection()
@@ -162,19 +200,24 @@ namespace Levenshtein
 
             sb.Append("       ");
 
-            for (int i = 0; i < m; ++i)
+            for (int i = 0; i < n; ++i)
                 sb.Append($"{b[i]}   ");
             sb.Append("\n");
 
-            for (int i = 0; i <= n; ++i)
+                string c;
+            for (int i = 0; i <= m; ++i)
             {
                 if (i > 0)
                 {
-                    string c = "\n   ";
-                    for (int j = 0; j <= m; ++j)
+                    c = "\n";
+                    for (int j = 0; j <= n; ++j)
                     {
                         var field = M[i, j];
-                        if (field == null) continue;
+                        if (field == null)
+                        {
+                            c += "    ";
+                            continue;
+                        }
                         //((field.Direction & ELevDirection.Left) != 0) ? " - " : "   ";
                         if (j != 0)
                         {
@@ -182,7 +225,7 @@ namespace Levenshtein
                             c += ((field?.Direction & ELevDirection.Up) != 0) ? "|" : " ";
                         }
                         else
-                            c += ((field?.Direction & ELevDirection.Up) != 0) ? "|" : " ";
+                            c += ((field?.Direction & ELevDirection.Up) != 0) ? "   |" : "     ";
                     }
 
                     sb.Append(c);
@@ -190,17 +233,24 @@ namespace Levenshtein
                 }
                 else
                     sb.Append("\n   ");
-                for (int j = 0; j <= m; ++j)
+                
+                for (int j = 0; j <= n; ++j)
                 {
                     var field = M[i, j];
-                    if ((j != 0) && (field != null))
-                    {
-                        var c = ((field?.Direction & ELevDirection.Left) != 0) ? " - " : "   ";
 
-                        sb.Append($"{c}{field}");
+                    if ((j != 0))
+                    {
+                        if (field == null)
+                            sb.Append("    ");
+                        else
+                        {
+                            c = ((field?.Direction & ELevDirection.Left) != 0) ? " - " : "   ";
+
+                            sb.Append($"{c}{field}");
+                        }
                     }
                     else
-                        sb.Append(field?.ToString());
+                        sb.Append(field?.ToString()??" ");
                 }
             }
 
@@ -213,17 +263,17 @@ namespace Levenshtein
 
             Console.Write("       ");
 
-            for (int i = 0; i < m; ++i)
+            for (int i = 0; i < n; ++i)
                 Console.Write($"{b[i]}   ");
             Console.WriteLine();
 
-            for (int i = 0; i <= n; ++i)
+            for (int i = 0; i <= m; ++i)
             {
                 if (i > 0)
                     Console.Write($"\n\n{a[i - 1]}  ");
                 else
                     Console.Write("\n   ");
-                for (int j = 0; j <= m; ++j)
+                for (int j = 0; j <= n; ++j)
                     Console.Write($"{M[i, j]}   ");
             }
         }

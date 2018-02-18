@@ -38,6 +38,7 @@
     <Compile Include="ELevDirection.cs" />
     <Compile Include="Alignment.cs" />
     <Compile Include="LevField.cs" />
+    <Compile Include="Helper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

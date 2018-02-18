@@ -24,7 +24,7 @@ namespace Levenshtein
         }
         public static implicit operator int (LevField field)
         {
-            return field?.Value??-1;
+            return field?.Value??int.MaxValue-1;
         }
 
         public override string ToString()
