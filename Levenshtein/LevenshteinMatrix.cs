@@ -19,7 +19,7 @@ namespace Levenshtein
         string a;
         string b;
 
-        public LevenshteinMatrix(string input1, string input2)
+        public LevenshteinMatrix(string input1, string input2, bool useHeristic = false)
         {
             m = input1.Length;
             n = input2.Length;
@@ -32,48 +32,56 @@ namespace Levenshtein
             M = new LevField[m+1, n+1];
             int colStart = 0;
             var K = Helper.HammingDistance(a, b);
-            Console.WriteLine(K);
 
             int f;
             LevField dist;
 
-            for (int i = 0; i <= m; ++i)
-            {
-                for (int j = colStart; j <= n; ++j)
+            if (useHeristic)
+                for (int i = 0; i <= m; ++i)
                 {
-                    dist  = new LevField(levDistanceDirection(i, j));
-
-                    f = dist + Math.Abs(i - j);
-
-                    if (f == K)
+                    for (int j = colStart; j <= n; ++j)
                     {
-                        if (j < i)
-                        {
-                            colStart = j + 1;
-                        }
-                        else if (j > i)
-                        {
-                            M[i, j] = dist;
-                            break;
-                        }
-                    }
-                    else if (f > K)
-                        if (j < i)
-                        {
-                            colStart = j + 2;
-                    }
-                        else if (j > i)
-                        {
-                            M[i, j] = dist;
-                            break;
-                    }
+                        dist = new LevField(levDistanceDirection(i, j));
 
-                    M[i, j] = dist;
+                        f = dist + Math.Abs(i - j);
 
-                    //Console.WriteLine(this);
-                    //Thread.Sleep(100);
+                        if (f == K)
+                        {
+                            if (j < i)
+                            {
+                                colStart = j + 1;
+                            }
+                            else if (j > i)
+                            {
+                                M[i, j] = dist;
+                                break;
+                            }
+                        }
+                        else if (f > K)
+                            if (j < i)
+                            {
+                                colStart = j + 2;
+                            }
+                            else if (j > i)
+                            {
+                                M[i, j] = dist;
+                                break;
+                            }
+
+                        M[i, j] = dist;
+
+                        //Console.WriteLine(this);
+                        //Thread.Sleep(100);
+                    }
                 }
-            }
+            else
+                for (int i = 0; i <= m; ++i)
+                {
+                    for (int j = colStart; j <= n; ++j)
+                    {
+                        M[i, j] = new LevField(levDistanceDirection(i, j));
+                    }
+                }
 
 
             
