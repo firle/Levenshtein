@@ -24,48 +24,42 @@ namespace Levenshtein
             m = input1.Length;
             n = input2.Length;
 
-            int dLength = Math.Abs(m-n);
-            int colOffset=0, rowOffset=0;
+            int dLength = Math.Abs(m - n);
+            int colOffset = 0, rowOffset = 0;
             if (m < n)
                 colOffset = dLength;
             if (n < m)
                 rowOffset = dLength;
-                
+
 
             int minLength = Math.Min(n, m);
 
             a = input1;
             b = input2;
 
-            M = new LevField[m+1, n+1];
+            M = new LevField[m + 1, n + 1];
             int colStart = 0;
             int colEnd = 0;
             var K = 0;
 
-            int f, skipCols=1, rowMin = 0, currentStart=0;
-            (int, int) minPos=(0,0);
+            int f, currentStart = 0;
             LevField dist;
 
-                    //K = Helper.HammingDistance(a, b, minPos.Item1, minPos.Item2);
+            K = Helper.HammingDistance(a, b);
             if (useHeristic)
                 for (int i = 0; i <= m; ++i)
                 {
-                    K = Helper.HammingDistance(a, b, minPos.Item1, minPos.Item2);
-                Console.WriteLine(K);
-                    rowMin = int.MaxValue;
-                if(colStart !=0)
-                    currentStart = Math.Min(minPos.Item2, colStart);
+                    //K = Helper.HammingDistance(a, b, minPos.Item1, minPos.Item2) + rowMin;
+                    //Console.WriteLine(K);
+                    //rowMin = int.MaxValue;
+                    if (colStart != 0)
+                        currentStart = colStart;
                     colStart = 0;
                     for (int j = currentStart; j <= n; ++j)
                     {
                         dist = new LevField(levDistanceDirection(i, j));
-                        if (dist < rowMin)
-                        {
-                            rowMin = dist;
-                            minPos = (i, j);
-                        }
-
-                        f = dist + Math.Abs(dLength - Math.Abs(i - j));
+                     
+                        f = dist + Math.Abs((m-i)-(n-j));
 
                         if (f >= K)
                         {
@@ -76,8 +70,11 @@ namespace Levenshtein
                                     colStart = (colStart == 0) ? j + ((f == K) ? 1 : 2) : colStart;
                                 else if ((colEnd < j) && (j - dLength > i))
                                 {
-                                    M[i, j] = dist;
-                                    colEnd = j;
+                                    if (f == K)
+                                    {
+                                        M[i, j] = dist;
+                                        colEnd = j;
+                                    }
                                     break;
                                 }
 
@@ -88,8 +85,11 @@ namespace Levenshtein
                                     colStart = (colStart == 0) ? j + ((f == K) ? 1 : 2) : colStart;
                                 else if ((colEnd < j) && (j > i))
                                 {
-                                    M[i, j] = dist;
-                                    colEnd = j;
+                                    if (f == K)
+                                    {
+                                        M[i, j] = dist;
+                                        colEnd = j;
+                                    }
                                     break;
                                 }
                             }
@@ -111,7 +111,7 @@ namespace Levenshtein
                 }
 
 
-            
+
         }
 
         public int levDistance(int i, int j)
@@ -175,6 +175,7 @@ namespace Levenshtein
 
         public int LevenshteinDistance { get { return M[m, n]; }}
 
+        public int HammingDistance { get { return Helper.HammingDistance(a, b); } }
 
         //public void PrintDirection()
         //{
