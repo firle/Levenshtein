@@ -6,23 +6,32 @@ namespace Levenshtein
 {
     public class Helper
     {
+
+        //public static int HammingDistance(IList<object> a, IList<object> b, int startA=0, int startB=0)
+        public static int HammingDistance(string a, string b, int startA = 0, int startB = 0)
+        {
+            int ham = Math.Abs((a.Length-startA) - (b.Length-startB));
+
+            int i = startA;
+            int j = startB;
+
+            while(i<a.Length &j<b.Length)
+            {
+                if (!a[i++].Equals(b[j++]))
+                    ham++;
+            }
+
+            return ham;
+        }
+
         public static int HammingDistance(IList<object> a, IList<object> b)
         {
-//#if DEBUG
-//            var time = DateTime.Now;
-//#endif
-
             int ham = Math.Abs(a.Count - b.Count);
             for (int i = 0; i < Math.Min(a.Count, b.Count); ++i)
                 if (!a[i].Equals(b[i]))
                     ham++;
-
-
-//#if DEBUG
-//            Console.WriteLine($"Hamming Time: {(DateTime.Now - time).TotalMilliseconds}");
-//#endif
-
-            return ham;
+            
+            return ham; 
         }
 
         public static int HammingDistance(string a, string b) => HammingDistance(a.Cast<object>().ToList(), b.Cast<object>().ToList());

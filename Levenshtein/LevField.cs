@@ -29,7 +29,7 @@ namespace Levenshtein
 
         public override string ToString()
         {
-            return Value?.ToString();
+            return (Value%10).ToString();
         }
     }
 }
