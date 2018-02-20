@@ -11,6 +11,13 @@ namespace Levenshtein
     {
         public static void Main(string[] args)
         {
+            SampleData();
+            //Benchmark();
+            //Test();
+            Console.ReadLine();
+        }
+        public static void SampleData()
+        {
             Console.WriteLine("Hello World!\n");
 
             //var input1 = Console.ReadLine();
@@ -21,16 +28,35 @@ namespace Levenshtein
                 ("Peter","Petra"),
                 ("abcdijklm","efgh"),
                 ("aabb","bbcc"),
-                ("aaaa","aaaabcdef"),
+                ("aaaa","aaaabcaadef"),
                 ("aaaabaaaaaaaab","baaabaaaaaaaaa"),
                 ("baabaaaaba","abaaaaaaaaaaaaaaaaaa")
             };
 
 
-            var data = testData[6];
+            var data = testData[4];
             var a = data.Item1;
             var b = data.Item2;
 
+            var dir = Path.Combine(Path.GetTempPath(), "Levenshtein", "data");
+            Directory.CreateDirectory(dir);
+            
+            FileStream ostrm;
+            StreamWriter writer;
+            TextWriter oldOut = Console.Out;
+            try
+            {
+                ostrm = new FileStream(Path.Combine(dir, "console.txt"), FileMode.Create, FileAccess.Write);
+                writer = new StreamWriter(ostrm);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Cannot open Redirect.txt for writing");
+                Console.WriteLine(e.Message);
+                return;
+            }
+            Console.SetOut(writer);
+          
             var start = DateTime.Now;
 
             var matrix = new LevenshteinMatrix(a,b, true);
@@ -45,23 +71,27 @@ namespace Levenshtein
             Console.WriteLine(matrix);
             Console.WriteLine($"LevenshteinDistance: {matrix.LevenshteinDistance}");
             Console.WriteLine();
-            //var matrix2 = new LevenshteinMatrix(a, b);
-            //Console.WriteLine(matrix2);
-            //Console.WriteLine($"LevenshteinDistance: {matrix.LevenshteinDistance}");
-            //Console.WriteLine();
+            matrix.CalculateLevenshteinDistance(a, b);
+            Console.WriteLine(matrix);
+            Console.WriteLine($"LevenshteinDistance: {matrix.LevenshteinDistance}");
+            Console.WriteLine();
 
 
-            Benchmark();
-            Test();
-            Console.ReadLine();
+
+            Console.SetOut(oldOut);
+            writer.Close();
+            ostrm.Close();
+            Console.WriteLine("Done");
+
+
+
         }
         public static void Test()
         {
             //Testing
 
             int iterations = 100000;
-            LevenshteinMatrix matrix1;
-            LevenshteinMatrix matrix2;
+            LevenshteinMatrix matrix = new LevenshteinMatrix();
             var minLength = 10;
             var lengthDiv = 20;
 
@@ -72,11 +102,9 @@ namespace Levenshtein
                 var a = RandomString(random.Next(lengthDiv) + minLength);
                 var b = RandomString(random.Next(lengthDiv) + minLength);
 
-                matrix1 = new LevenshteinMatrix(a,b);
-                var lev1 = matrix1.LevenshteinDistance;
-
-                matrix2 = new LevenshteinMatrix(a,b, true);
-                var lev2 = matrix2.LevenshteinDistance;
+                var lev1 = matrix.CalculateLevenshteinDistance(a,b);
+                
+                var lev2 = matrix.CalculateLevenshteinDistance(a, b, true);
 
                 //Console.WriteLine($"({lev1},{lev2})");
                 //Console.WriteLine(iterations);
@@ -90,14 +118,8 @@ namespace Levenshtein
                     Console.WriteLine(b);
                     Console.WriteLine();
                     Console.WriteLine($"HammingDistance: {Helper.HammingDistance(a,b)}");
-
-                    Console.WriteLine();
-                    Console.WriteLine(matrix1);
-                    Console.WriteLine($"LevenshteinDistance: {lev1}");
-                    Console.WriteLine();
-
-                    Console.WriteLine(matrix2);
-                    Console.WriteLine($"LevenshteinDistance: {lev2}");
+                    Console.WriteLine($"LevenshteinDistance 1: {lev1}");
+                    Console.WriteLine($"LevenshteinDistance 2: {lev2}");
                     Console.WriteLine();
                     break;
                 }
@@ -108,14 +130,14 @@ namespace Levenshtein
         {
             //BENCHMARK
             bool printBenchData = false;
-            LevenshteinMatrix matrix;
+            LevenshteinMatrix matrix = new LevenshteinMatrix();
             DateTime start;
 
             DateTime end;
-            var minLength = 10;
-            var lengthDiv = 15;
+            var minLength = 2000;
+            var lengthDiv = 100;
             var numPairs = 20;
-            var iterations = 1000;
+            var iterations = 2;
 
             var benchData = new List<(string, string)>();
 
@@ -134,23 +156,22 @@ namespace Levenshtein
             Console.WriteLine();
             Console.WriteLine("BENCHMARK Printing BenchData");
             Console.WriteLine();
-            foreach (var item in benchData)
-            {
-                matrix = new LevenshteinMatrix(item.Item1, item.Item2);
-                var lev1 = matrix.LevenshteinDistance;
-                //Console.WriteLine(matrix);
-                //Console.WriteLine($"LevenshteinDistance: {lev1}");
-                //Console.WriteLine();
+            if (printBenchData)
+                foreach (var item in benchData)
+                {
+                    var lev1 = matrix.CalculateLevenshteinDistance(item.Item1, item.Item2);
+                    //Console.WriteLine(matrix);
+                    //Console.WriteLine($"LevenshteinDistance: {lev1}");
+                    //Console.WriteLine();
 
-                matrix = new LevenshteinMatrix(item.Item1, item.Item2, true);
-                var lev2 = matrix.LevenshteinDistance;
-                Console.WriteLine(matrix);
-                Console.WriteLine($"Levenshtein Distance: {lev2}");
-                Console.WriteLine($"Hamming Distance: {matrix.HammingDistance}");
-                Console.WriteLine();
+                    var lev2 = matrix.CalculateLevenshteinDistance(item.Item1, item.Item2, true);
+                    Console.WriteLine(matrix);
+                    Console.WriteLine($"Levenshtein Distance: {lev2}");
+                    Console.WriteLine($"Hamming Distance: {matrix.HammingDistance}");
+                    Console.WriteLine();
 
-                Debug.Assert(lev1==lev2);
-            }
+                    Debug.Assert(lev1 == lev2);
+                }
 
             Console.WriteLine();
             Console.WriteLine("BENCHMARK without heuristic");
@@ -160,7 +181,7 @@ namespace Levenshtein
             {
                 foreach (var item in benchData)
                 {
-                    matrix = new LevenshteinMatrix(item.Item1, item.Item2);
+                    matrix.CalculateLevenshteinDistance(item.Item1, item.Item2);
                 }
             }
             end = DateTime.Now;
@@ -181,7 +202,7 @@ namespace Levenshtein
             {
                 foreach (var item in benchData)
                 {
-                    matrix = new LevenshteinMatrix(item.Item1, item.Item2, true);
+                    matrix.CalculateLevenshteinDistance(item.Item1, item.Item2, true);
                 }
             }
             end = DateTime.Now;

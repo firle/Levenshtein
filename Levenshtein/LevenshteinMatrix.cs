@@ -4,11 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Levenshtein
 {
     public class LevenshteinMatrix
     {
+        object locker = new object();
         int m, n;
 
         //int[,] M;
@@ -19,7 +21,10 @@ namespace Levenshtein
         string a;
         string b;
 
-        public LevenshteinMatrix(string input1, string input2, bool useHeristic = false)
+        public LevenshteinMatrix() { }
+
+        public LevenshteinMatrix(string input1, string input2, bool useHeristic = false) => CalculateLevenshteinDistance(input1, input2, useHeristic);
+        public int CalculateLevenshteinDistance(string input1, string input2, bool useHeristic = false)
         {
             m = input1.Length;
             n = input2.Length;
@@ -104,14 +109,14 @@ namespace Levenshtein
             else
                 for (int i = 0; i <= m; ++i)
                 {
-                    for (int j = colStart; j <= n; ++j)
+                    for (int j = 0; j <= n; ++j)
                     {
                         M[i, j] = new LevField(levDistanceDirection(i, j));
                     }
                 }
 
 
-
+            return this.LevenshteinDistance;
         }
 
         public int levDistance(int i, int j)
@@ -315,9 +320,38 @@ namespace Levenshtein
         }
         public void CalcAlignments()
         {
-            
+            lock(locker)
+            {
+
+            }
         }
 
+        private async Task<IEnumerable<string>> CalcAlignments(int i, int j)
+        {
+            var list = new List<string>();
+
+            if ((i == 0) && (j == 0))
+                return list;
+
+            LevField field = null;
+            try
+            {
+                field = M[i, j];
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+            }
+            if (field.Direction == ELevDirection.None)
+                return null;
+
+
+
+            
+
+            return null;
+        }
         private IEnumerable<ELevDirection> GetPredecessors(int i, int j)
         {
             var list = new List<ELevDirection>();
